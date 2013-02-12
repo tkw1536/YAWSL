@@ -1,7 +1,7 @@
 {
   "name": "yawsl",
   "preferGlobal": false,
-  "version": "1.0",
+  "version": "1.0.0",
   "author": "tkw01536 <tkw01536@gmail.com>",
   "description": "yet another web server library for nodejs",
   "main": "./lib/main.js",
