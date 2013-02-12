@@ -1,0 +1,21 @@
+{
+  "name": "yawsl",
+  "preferGlobal": false,
+  "version": "1.0",
+  "author": "tkw01536 <tkw01536@gmail.com>",
+  "description": "yet another web server library for nodejs",
+  "main": "./lib/main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tkw1536/YAWSL.git"
+  },
+  "keywords": [
+    "http",
+    "server",
+    "web"
+  ],
+  "dependencies" : {},
+  "engines": {
+    "node": ">=0.8"
+  }
+}
