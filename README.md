@@ -1,7 +1,10 @@
 # YAWSL
 Yet another web server library for node.js. 
+
 (c) Tom Wiesing 2013
-It is compatible with http.createServer. 
+
+It is compatible with `http.createServer`. 
+
 You can use it for example like this: 
 
 	var yawsl = require('yawsl');
@@ -56,38 +59,57 @@ When using any other YAWSL functionality YAWSL will automatically pass simple fu
 ## Functionality
 In addition to this way of easily creating servers, YAWSL offers several functionality to simplify common tasks. 
 
+### Core
 * `yawsl(YAWSLObject)` return an instance of `http.Server` which  answers to a request with the specefied  YAWSLObject. 
 * `yawsl.wrap(ListenerFunction)` wraps a simple function create a YAWSLObject. 
 * `yawsl.make(Listener1, Listener2, ...)` creates a YAWSLObject object, see YAWSL Functions above. 
+
+### Simple Branching
+* `yawsl.ifServer(condition, YAWSLObjectTrue, YAWSLObjectFalse`) checks if the function `condition(req, data)` is true or false. If true, calls YAWSLObjectTrue else YAWSLObjectFalse. 
+* `yawsl.active(YAWSLObject)` calls YAWSLObject, ignores the result and end request. 
+* `yawsl.passive(YAWSLObject)` calls YAWSLObject, ignores the result and continues. Useful for debugging. 
+* `yawsl.get(YAWSLObject)` responds to GET requests only. 
+* `yawsl.post(YAWSLObject)` responds to POST requests only. 
+* `yawsl.handled(YAWSLObject, YAWSLObjectFallBack)` tries to call YAWSLObject. If an unhandled exception occurs, YAWSLObjectFallBack will be called. 
+
+### Simple Servers
+* `yawsl.nullServer()` responds to every request with an empty text/plain string. 
+* `yawsl.textServer(text, [mimeType = 200], status)` responds to every request with the specefied text, mimeType and status. text, mimeType, status may be functions depending on the request and data.
+* `yawsl.echoServer()` responds to every request by echoing the request headers. 
+
+### Advanced Branching
 * `yawsl.subServer(subServerRoot, YAWSLObject)` creates a YAWSLObject which answers every request in subServerRoot with the server YAWSLObject. Not ethat the path of the request will be changed to match the new root path. 
+* `yawsl.staticRequest(path, YAWSLObject)` always answer a request to path with YAWSLObject. 
+* `yawsl.otherServer(httpServerObj)` responds to every request as if the specefied httpServerObj would answer it. Note that the server does not have to be listening. 
+
+### Header / data object extensions
+* `yawsl.forceHead(code, headers, YAWSLObject)` forces any response in YAWSLObject to answer with the specefied code and headers. 
+* `yawsl.forward(to, YAWSLObject)` forwards every request to the specefied path. The Body of the response will be determined by YAWSLObject. 
+* `yawsl.session(createNewObject, expires, sessionStoreObject, YAWSLObject)` Enabled sessions in the data object. A session expires after `expires` milliseconds. The `sessionStoreObject` must be an initially empty object which is shared over all session request to store session. YAWSLObject will have the property data.session with the following properties: 
+	* `session.key` unique key of the session. 
+	* `session.value` an object containing some value which is copied from session to session. Intially created by `createNewObject(req, data)`
+	* `session.lastAccess` integer containing the last access to the session. 
+	* `session.expire()` function to expire the session immediatly. 
+
+### File Handling
+* `yawsl.file(fileName, mimeType, status)` reads file and passes it to the client with the specefied mimeType and status. fileName, mimeType, status may be functions depending on the request and data.  object of the request. 
 * `yawsl.staticServer(fileRoot, options)` creates a static file server which server files from fileRoot. Options is a hash which may contain the following options: 
 	* `options.mimeTypes`: map from file extension to file types. 
 	* `options.indexFile`: The index File to server when a directory is requested. Default: 'index.html'
 	* `options.ignore`: Function which is called to check if a filename is forbidden. Default: `function(filename){return false;}`
 	* `options.404`: YAWSLObject to be called when an object is not found. 
 	* `options.404`: YAWSLObject to be called when access to an object is forbidden. 
-* `yawsl.staticRequest(path, YAWSLObject)` always answer a request to path with YAWSLObject. 
-* `yawsl.echoServer()` responds to every request by echoing the request headers. 
-* `yawsl.passive(YAWSLObject)` calls YAWSLObject, ignores the result and continues. Useful for debugging. 
-* `yawsl.active(YAWSLObject)` calls YAWSLObject, ignores the result and end request. 
-* `yawsl.handled(YAWSLObject, YAWSLObjectFallBack)` tries to call YAWSLObject. If an unhandled exception occurs, YAWSLObjectFallBack will be called. 
-* `yawsl.nullServer()` responds to every request with an empty text/plain string. 
-* `yawsl.file(fileName, mimeType, status)` reads file and passes it to the client with the specefied mimeType and status. fileName, mimeType, status may be functions depending on the request and data.  object of the request. 
-* `yawsl.textServer(text, [mimeType = 200], status)` responds to every request with the specefied text, mimeType and status. text, mimeType, status may be functions depending on the request and data.
-* `yawsl.otherServer(httpServerObj)` responds to every request as if the specefied httpServerObj would answer it. Note that the server does not have to be listening. 
-* `yawsl.post(YAWSLObject)` responds to POST requests only. 
-* `yawsl.get(YAWSLObject)` answers to GET requests only. 
-* `yawsl.forceHead(code, headers, YAWSLObject)` forces any response in YAWSLObject to answer with the specefied code and headers. 
-* `yawsl.forward(to, YAWSLObject)` forwards every request to the specefied path. The Body of the response will be determined by YAWSLObject. 
-* `yawsl.provideJS(ClientVariableName, JSObject)` provides a javascript object to the client as variableName. 
-* `yawsl.ifServer(condition, YAWSLObjectTrue, YAWSLObjectFalse`) checks if the function `condition(req, data)` is true or false. If true. calls YAWSLObjectTrue else YAWSLObjectFalse. 
-* `yawsl.session(createNewObject, expires, sessionStoreObject, YAWSLObject)` Enabled sessions in the data object. A session expires after `expires` milliseconds. The `sessionStoreObject` must be an initially empty object which is shared over all session request to store session. YAWSLObject will have the property data.session with the following properties: 
-	* `session.key` unique key of the session. 
-	* `session.value` an object containing some value which is copied from session to session. Intially created by `createNewObject(req, data)`
-	* `session.lastAccess` integer containing the last access to the session. 
-	* `session.expire()` function to expire the session immediatly. 
+
+
+### Authorisation
 * `yawsl.basicAuth(realmName, authHandler, YAWSLObject, YAWSLObjectNoAuth)` Creates a simple HTTP Basic authentication protected area. `realmName` is the name of the realm, `authHandler` is a function of username and password which validates a user/password combination. YAWSLObject will be called if the authentication succedes and YAWSLObjectNoAuth otherwise. 
-*`yawsl.pathLogin(...)`  undocumented. 
+* `yawsl.pathLogin(...)`  undocumented. 
+
+
+### Misc
+* `yawsl.provideJS(ClientVariableName, JSObject)` provides a javascript object to the client as variableName. 
+
+
 ##License
 		    DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
 		            Version 2, December 2004
